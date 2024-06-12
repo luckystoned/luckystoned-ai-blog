@@ -1,7 +1,10 @@
-
 "use client";
-
 import React, { useEffect, useRef, useState } from "react";
+import { useMakeCopilotReadable, CopilotKit } from "@copilotkit/react-core";
+import {
+  CopilotTextarea,
+  HTMLCopilotTextAreaElement,
+} from "@copilotkit/react-textarea";
 import Image from "next/image";
 
 // Define the Comment component
@@ -11,30 +14,59 @@ export default function Comment() {
   const [comments, setComments] = useState<any[]>([]);
   const [articleContent, setArticleContent] = useState("");
 
+  useMakeCopilotReadable(
+    "Blog article content: " + JSON.stringify(articleContent)
+  );
+
+  const copilotTextareaRef = useRef<HTMLCopilotTextAreaElement>(null);
+
   return (
     <div className="max-w-2xl mx-auto w-full p-3">
       {/* Form for submitting a comment */}
-      <form action={""} className="border border-teal-500 rounded-md p-3 mb-4">
-        {/* Textarea for entering a comment */}
-        <textarea
-          id="content"
-          name="content"
-          placeholder="Add a comment..."
-          rows={3}
-          onChange={(e) => setComment(e.target.value)}
-          value={comment}
-          className="hidden"
-        />
+      <CopilotKit url="/api/copilotkit">
+        <form
+          action={""}
+          className="border border-teal-500 rounded-md p-3 mb-4">
+          <textarea
+            id="content"
+            name="content"
+            placeholder="Add a comment..."
+            rows={3}
+            onChange={(e) => setComment(e.target.value)}
+            value={comment}
+            className="hidden"
+          />
 
-        {/* Submit button */}
-        <div className="flex justify-between items-center mt-5">
-          <button
-            type="submit"
-            className="bg-blue-500 text-white font-bold py-2 px-4 rounded">
-            Submit
-          </button>
-        </div>
-      </form>
+          <CopilotTextarea
+            className="p-4 w-full rounded-lg mb-2 border text-sm border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-cyan-500 focus:ring-cyan-500 resize-none"
+            ref={copilotTextareaRef}
+            placeholder="Start typing for content autosuggestion."
+            onChange={(event) => setComment(event.target.value)}
+            rows={5}
+            autosuggestionsConfig={{
+              textareaPurpose: articleContent,
+              chatApiConfigs: {
+                suggestionsApiConfig: {
+                  forwardedParams: {
+                    max_tokens: 5,
+                    stop: ["\n", ".", ","],
+                  },
+                },
+                insertionApiConfig: {},
+              },
+              debounceTime: 250,
+            }}
+          />
+
+          <div className="flex justify-between items-center mt-5">
+            <button
+              type="submit"
+              className="bg-blue-500 text-white font-bold py-2 px-4 rounded">
+              Submit
+            </button>
+          </div>
+        </form>
+      </CopilotKit>
 
       {/* Comments section */}
       <p className="text-white mb-2">Comments:</p>
@@ -45,9 +77,7 @@ export default function Comment() {
           {/* Profile picture */}
           <Image
             className="w-10 h-10 rounded-full bg-gray-200"
-            src={`(link unavailable){encodeURIComponent(
-              "Silhouette"
-            )}`}
+            src="https://placehold.co/500x500/png"
             width={500}
             height={500}
             alt="Profile Picture"
