@@ -9,6 +9,7 @@ import {
   CopilotTextarea,
   HTMLCopilotTextAreaElement,
 } from "@copilotkit/react-textarea";
+import { addArticle } from "@/utils/supabase/AddArticle";
 import { QuillEditor } from "./QuillEditor";
 import { quillModules } from "./QuillEditor";
 import { quillFormats } from "./QuillEditor";
@@ -79,7 +80,7 @@ export default function CreatePost() {
         </h1>
 
         {/* Form for creating a post */}
-        <form action={""} className="flex flex-col gap-4 mb-2 mt-2">
+        <form action={addArticle} className="flex flex-col gap-4 mb-2 mt-2">
           <div className="flex flex-col gap-4 sm:flex-row justify-between mb-2">
             {/* Input field for article title */}
             <input

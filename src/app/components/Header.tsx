@@ -23,6 +23,7 @@ export default function Header() {
       // Get the user data from Supabase auth
       const { data, error } = await supabase.auth.getUser();
 
+
       // If there's an error or no user data, log a message
       if (error || !data?.user) {
         console.log("No User");
@@ -33,7 +34,7 @@ export default function Header() {
       }
 
       // Define the email of the signed-up user
-      const userEmail = "email of signed-up user";
+      const userEmail = "luckystoned.dev@gmail.com";
 
       // Check if the user is an admin (email matches)
       if (!data?.user || data.user?.email !== userEmail) {
