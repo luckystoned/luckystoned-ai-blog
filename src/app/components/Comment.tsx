@@ -6,13 +6,51 @@ import {
   HTMLCopilotTextAreaElement,
 } from "@copilotkit/react-textarea";
 import Image from "next/image";
+import { addComment } from "@/utils/supabase/AddComment";
+import { createClient } from "@/utils/supabase/client";
 
 // Define the Comment component
-export default function Comment() {
+export default function Comment({ postId }: { postId: any }) {
   // State variables for comment, comments, and article content
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState<any[]>([]);
   const [articleContent, setArticleContent] = useState("");
+
+  useEffect(() => {
+    // Define an async function to fetch comments
+    const fetchComments = async () => {
+      // Create a Supabase client instance
+      const supabase = createClient();
+      // Fetch comments from the "comments" table
+      const { data, error } = await supabase.from("comments").select("*");
+      // If data is available, update the comments state
+      if (data) {
+        setComments(data);
+      }
+    };
+  
+    // Define an async function to fetch article content
+    const fetchArticleContent = async () => {
+      // Create a Supabase client instance
+      const supabase = createClient();
+      // Fetch article content from the "articles" table
+      // Filter by the current postId
+      const { data, error } = await supabase
+        .from("articles")
+        .select("*")
+        .eq("id", postId)
+        .single();
+      // If the fetched article ID matches the current postId
+      if (data?.id == postId) {
+        // Update the article content state
+        setArticleContent(data.content);
+      }
+    };
+  
+    // Call the fetch functions
+    fetchArticleContent();
+    fetchComments();
+  }, [postId]);
 
   useMakeCopilotReadable(
     "Blog article content: " + JSON.stringify(articleContent)
@@ -25,7 +63,7 @@ export default function Comment() {
       {/* Form for submitting a comment */}
       <CopilotKit url="/api/copilotkit">
         <form
-          action={""}
+          action={addComment}
           className="border border-teal-500 rounded-md p-3 mb-4">
           <textarea
             id="content"
@@ -70,7 +108,34 @@ export default function Comment() {
 
       {/* Comments section */}
       <p className="text-white mb-2">Comments:</p>
-
+      {comments?.map(
+          (postComment: any) =>
+            postComment.postId == postId && (
+              <div
+                key={postComment.id}
+                className="flex p-4 border-b dark:border-gray-600 text-sm">
+                <div className="flex-shrink-0 mr-3">
+                  <Image
+                    className="w-10 h-10 rounded-full bg-gray-200"
+                    src={`https://source.unsplash.com/featured/?${encodeURIComponent(
+                      "Silhouette"
+                    )}`}
+                    width={500}
+                    height={500}
+                    alt="Profile Picture"
+                  />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center mb-1">
+                    <span className="font-bold text-white mr-1 text-xs truncate">
+                      Anonymous
+                    </span>
+                  </div>
+                  <p className="text-gray-500 pb-2">{postComment.content}</p>
+                </div>
+              </div>
+            )
+        )}
       {/* Comment item (currently hardcoded) */}
       <div key={""} className="flex p-4 border-b dark:border-gray-600 text-sm">
         <div className="flex-shrink-0 mr-3">
